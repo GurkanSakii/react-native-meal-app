@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
 function MealDetails({ duration, complexity, affordability, style, textStyle }) {
   return (

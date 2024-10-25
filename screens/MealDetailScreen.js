@@ -1,22 +1,45 @@
-import { Image, StyleSheet, Text, View, ScrollView } from "react-native";
-import { MEALS } from "../data/dummy-data";
-import MealDetails from "../components/MealDetails";
-import Subtitle from "../components/MealDetail/Subtitle";
-import List from "../components/MealDetail/List";
 import { useLayoutEffect } from "react";
-import IconButton from "../components/IconButton";
-function MealDetailScreen({ route, navigation }) {
-  const mealId = route.params.mealId;
+import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
+import IconButton from "../components/IconButton";
+import List from "../components/MealDetail/List";
+import Subtitle from "../components/MealDetail/Subtitle";
+import MealDetails from "../components/MealDetails";
+import { MEALS } from "../data/dummy-data";
+import { addFavorite, removeFavorite } from "../store/favorites";
+
+function MealDetailScreen({ route, navigation }) {
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
+
+  const mealId = route.params.mealId;
   const selectedMeal = MEALS.find((meal) => meal.id === mealId);
+
+  const mealIsFavorite = favoriteMealIds.includes(mealId);
+
+  function changeFavoriteStatusHandler() {
+    if (mealIsFavorite) {
+      dispatch(removeFavorite({ id: mealId }));
+    } else {
+      dispatch(addFavorite({ id: mealId }));
+    }
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
-        return <IconButton icon="star" color="white" />;
+        return (
+          <IconButton
+            icon={mealIsFavorite ? "star" : "star-outline"}
+            color="white"
+            onPress={changeFavoriteStatusHandler}
+          />
+        );
       },
     });
-  });
+  }, [navigation, changeFavoriteStatusHandler]);
+
   return (
     <ScrollView style={styles.rootContainer}>
       <Image style={styles.image} source={{ uri: selectedMeal.imageUrl }} />
@@ -42,7 +65,9 @@ function MealDetailScreen({ route, navigation }) {
 export default MealDetailScreen;
 
 const styles = StyleSheet.create({
-  rootContainer: { marginBottom: 32 },
+  rootContainer: {
+    marginBottom: 32,
+  },
   image: {
     width: "100%",
     height: 350,
